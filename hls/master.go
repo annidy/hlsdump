@@ -91,6 +91,20 @@ func (d *Dumper) parseMaster(masterURL *url.URL, scanner *bufio.Scanner) (err er
 					err = errInvalidAttributeList
 					break
 				}
+				if uri, ok := attr["URI"]; ok {
+					i++
+					s := &stream{
+						d:    d,
+						name: fmt.Sprintf("%s-%d", d.Name, i),
+					}
+					s.playlist.url, err = masterURL.Parse(uri)
+					if err != nil {
+						return
+					}
+
+					log.Println("Downloading stream:", s.playlist.url)
+					d.streams = append(d.streams, s)
+				}
 
 				// TODO: Support renditions
 			case "EXT-X-STREAM-INF":
@@ -107,17 +121,12 @@ func (d *Dumper) parseMaster(masterURL *url.URL, scanner *bufio.Scanner) (err er
 				_, media := mediaTags[k]
 				_, segment := segmentTags[k]
 				if media || segment {
-					if len(d.streams) > 0 {
-						err = errMixedPlaylist
-						return
-					}
-
 					s := &stream{
 						d:    d,
 						name: d.Name,
 					}
 					s.playlist.url = masterURL
-					d.streams = []*stream{s}
+					d.streams = append(d.streams, s)
 					return
 				}
 			}

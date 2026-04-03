@@ -107,8 +107,8 @@ loop:
 					line = "#EXT-X-VERSION:4" // For byte ranges
 				}
 			case "EXT-X-TARGETDURATION":
-				var duration int
-				duration, err = strconv.Atoi(v)
+				var duration float64
+				duration, err = strconv.ParseFloat(v, 64)
 				targetDuration = time.Duration(duration) * time.Second
 			case "EXT-X-MEDIA-SEQUENCE":
 				sequence, err = strconv.Atoi(v)
